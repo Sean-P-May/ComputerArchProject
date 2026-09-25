@@ -1,0 +1,104 @@
+// Behavioral implementation of MIPS Register File
+
+// Author of Modifications: Emily Hendershot (tested in JDoodle)
+
+module reg_file (RR1,RR2,WR,WD,RegWrite,RD1,RD2,clock);
+
+  input [1:0] RR1,RR2,WR;
+  input [15:0] WD;
+  input RegWrite,clock;
+  output [7:0] RD1,RD2;
+
+  reg [15:0] Regs[0:15];
+
+  assign RD1 = Regs[RR1];
+  assign RD2 = Regs[RR2];
+
+  initial Regs[0] = 0;
+
+  always @(negedge clock)
+    if (RegWrite==1 & WR!=0) 
+	Regs[WR] <= WD;
+
+endmodule
+
+// Compiling and simulation
+
+module test ();
+
+ reg [1:0] rr1,rr2,wr;
+ reg [15:0] wd;
+ reg regwrite, clock;
+ wire [7:0] rd1,rd2;
+
+ reg_file regs (rr1,rr2,wr,wd,regwrite,rd1,rd2,clock);
+
+ initial 
+   begin  
+
+     clock=0; regwrite=1; wd=0; //start clock, enable writing
+
+     #10      rr1=0;rr2=0;
+     #10 wr=1;rr1=1;rr2=1;clock=1;
+     #10                  clock=0;
+     #10 wr=2;rr1=2;rr2=2;clock=1;
+     #10                  clock=0;
+     #10 wr=3;rr1=3;rr2=3;clock=1;
+     #10                  clock=0;
+
+     #10 regwrite=0; //disable writing
+
+     #10 wd=1;       // set write data
+
+     #10 wr=1;rr1=1;rr2=1;clock=1;
+     #10                  clock=0;
+     #10 wr=2;rr1=2;rr2=2;clock=1;
+     #10                  clock=0;
+     #10 wr=3;rr1=3;rr2=3;clock=1;
+     #10                  clock=0;
+
+     #10 regwrite=1; //enable writing
+
+     #10 wd=1;       // set write data
+
+     #10 wr=1;rr1=1;rr2=1;clock=1;
+     #10                  clock=0;
+     #10 wr=2;rr1=2;rr2=2;clock=1;
+     #10                  clock=0;
+     #10 wr=3;rr1=3;rr2=3;clock=1;
+     #10                  clock=0;
+
+   end 
+
+ initial
+   $monitor ("regwrite=%d clock=%d rr1=%d rr2=%d wr=%d wd=%1d rd1=%1d rd2=%1d",regwrite,clock,rr1,rr2,wr,wd,rd1,rd2);
+ 
+endmodule 
+
+/* Output
+
+regwrite=1 clock=0 rr1= x rr2= x wr= x wd=0 rd1=x rd2=x
+regwrite=1 clock=0 rr1= 0 rr2= 0 wr= x wd=0 rd1=0 rd2=0
+regwrite=1 clock=1 rr1= 1 rr2= 1 wr= 1 wd=0 rd1=x rd2=x
+regwrite=1 clock=0 rr1= 1 rr2= 1 wr= 1 wd=0 rd1=0 rd2=0
+regwrite=1 clock=1 rr1= 2 rr2= 2 wr= 2 wd=0 rd1=x rd2=x
+regwrite=1 clock=0 rr1= 2 rr2= 2 wr= 2 wd=0 rd1=0 rd2=0
+regwrite=1 clock=1 rr1= 3 rr2= 3 wr= 3 wd=0 rd1=x rd2=x
+regwrite=1 clock=0 rr1= 3 rr2= 3 wr= 3 wd=0 rd1=0 rd2=0
+regwrite=0 clock=0 rr1= 3 rr2= 3 wr= 3 wd=0 rd1=0 rd2=0
+regwrite=0 clock=0 rr1= 3 rr2= 3 wr= 3 wd=1 rd1=0 rd2=0
+regwrite=0 clock=1 rr1= 1 rr2= 1 wr= 1 wd=1 rd1=0 rd2=0
+regwrite=0 clock=0 rr1= 1 rr2= 1 wr= 1 wd=1 rd1=0 rd2=0
+regwrite=0 clock=1 rr1= 2 rr2= 2 wr= 2 wd=1 rd1=0 rd2=0
+regwrite=0 clock=0 rr1= 2 rr2= 2 wr= 2 wd=1 rd1=0 rd2=0
+regwrite=0 clock=1 rr1= 3 rr2= 3 wr= 3 wd=1 rd1=0 rd2=0
+regwrite=0 clock=0 rr1= 3 rr2= 3 wr= 3 wd=1 rd1=0 rd2=0
+regwrite=1 clock=0 rr1= 3 rr2= 3 wr= 3 wd=1 rd1=0 rd2=0
+regwrite=1 clock=1 rr1= 1 rr2= 1 wr= 1 wd=1 rd1=0 rd2=0
+regwrite=1 clock=0 rr1= 1 rr2= 1 wr= 1 wd=1 rd1=1 rd2=1
+regwrite=1 clock=1 rr1= 2 rr2= 2 wr= 2 wd=1 rd1=0 rd2=0
+regwrite=1 clock=0 rr1= 2 rr2= 2 wr= 2 wd=1 rd1=1 rd2=1
+regwrite=1 clock=1 rr1= 3 rr2= 3 wr= 3 wd=1 rd1=0 rd2=0
+regwrite=1 clock=0 rr1= 3 rr2= 3 wr= 3 wd=1 rd1=1 rd2=1
+
+*/
