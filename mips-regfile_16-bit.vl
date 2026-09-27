@@ -17,7 +17,7 @@ module reg_file (RR1,RR2,WR,WD,RegWrite,RD1,RD2,clock);
   initial Regs[0] = 0; //reg 0 always zero
 
   always @(negedge clock)
-    if (RegWrite==1 & WR!=0) //only write when enabled and do not wirte to reg zero 
+    if (RegWrite==1 & WR!=0) //only write when enabled and never write to reg zero 
 	Regs[WR] <= WD;
 
 endmodule
