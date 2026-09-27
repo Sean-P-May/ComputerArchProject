@@ -7,17 +7,17 @@ module reg_file (RR1,RR2,WR,WD,RegWrite,RD1,RD2,clock);
   input [1:0] RR1,RR2,WR;
   input [15:0] WD;
   input RegWrite,clock;
-  output [7:0] RD1,RD2;
+  output [15:0] RD1,RD2; //16 bit output
 
-  reg [15:0] Regs[0:15];
+  reg [15:0] Regs[0:3]; //only 4 Registers
 
   assign RD1 = Regs[RR1];
   assign RD2 = Regs[RR2];
 
-  initial Regs[0] = 0;
+  initial Regs[0] = 0; //reg 0 always zero
 
   always @(negedge clock)
-    if (RegWrite==1 & WR!=0) 
+    if (RegWrite==1 & WR!=0) //only write when enabled and do not wirte to reg zero 
 	Regs[WR] <= WD;
 
 endmodule
@@ -29,7 +29,7 @@ module test ();
  reg [1:0] rr1,rr2,wr;
  reg [15:0] wd;
  reg regwrite, clock;
- wire [7:0] rd1,rd2;
+ wire [15:0] rd1,rd2; //16 bits
 
  reg_file regs (rr1,rr2,wr,wd,regwrite,rd1,rd2,clock);
 
