@@ -1,0 +1,108 @@
+// Behavioral model of MIPS - single cycle implementation, R-types and addi
+module reg_file (RR1,RR2,WR,WD,RegWrite,RD1,RD2,clock);
+  input [4:0] RR1,RR2,WR;
+  input [31:0] WD;
+  input RegWrite,clock;
+  output [31:0] RD1,RD2;
+  reg [31:0] Regs[0:31];
+  assign RD1 = Regs[RR1];
+  assign RD2 = Regs[RR2];
+  initial Regs[0] = 0;
+  always @(negedge clock)
+    if (RegWrite==1 & WR!=0) 
+	Regs[WR] <= WD;
+endmodule
+
+module alu (ALUctl,A,B,ALUOut,Zero);
+  input [3:0] ALUctl;
+  input [31:0] A,B;
+  output reg [31:0] ALUOut;
+  output Zero;
+  always @(ALUctl, A, B) // reevaluate if these change
+    case (ALUctl)
+      4'b0000: ALUOut <= A & B;
+      4'b0001: ALUOut <= A | B;
+      4'b0010: ALUOut <= A + B;
+      4'b0110: ALUOut <= A - B;
+      4'b0111: ALUOut <= A < B ? 1:0;
+      4'b1100: ALUOut <= ~A & ~B;
+      4'b1101: ALUOut <= ~A | ~B;
+    endcase
+  assign Zero = (ALUOut==0); // Zero is true if ALUOut is 0
+endmodule
+
+module MainControl (Op,Control); 
+  input [5:0] Op;
+  output reg [4:0] Control;
+// Control bits: RegDst,ALUSrc,RegWrite,ALUOp
+  always @(Op) case (Op)
+    6'b000000: Control <= 5'b10110; // Rtype
+    6'b001000: Control <= 5'b01100; // ADDI
+  endcase
+endmodule
+
+module ALUControl (ALUOp,FuncCode,ALUCtl); 
+  input [1:0] ALUOp;
+  input [5:0] FuncCode;
+  output reg [3:0] ALUCtl;
+  always @(ALUOp,FuncCode) case (ALUOp)
+    2'b00: ALUCtl <= 4'b0010; // add
+    2'b01: ALUCtl <= 4'b0110; // subtract
+    2'b10: case (FuncCode)
+	     32: ALUCtl <= 4'b0010; // add
+	     34: ALUCtl <= 4'b0110; // sub
+	     36: ALUCtl <= 4'b0000; // and
+	     37: ALUCtl <= 4'b0001; // or
+	     39: ALUCtl <= 4'b1100; // nor
+	     42: ALUCtl <= 4'b0111; // slt
+    endcase
+  endcase
+endmodule
+
+module CPU (clock,PC,ALUOut,IR);
+  input clock;
+  output [15:0] ALUOut,IR,PC;
+  reg[15:0] PC;
+  reg[15:0] IMemory[0:1023]; // don't worry about memory
+  wire [15:0] IR,NextPC,A,B,ALUOut,RD2,SignExtend;
+  wire [3:0] ALUctl;
+  wire [1:0] WR; // Write Register
+// Test Program, RECOMPILE/EDIT FOR 16 BITS, USE BINARY
+  initial begin 
+    IMemory[0] = 16'b0111_00_01_00001111;  // addi $1, $0,  15   ($t1=15)
+    IMemory[1] = 16'b0111_00_10_00000111;  // addi $2, $0,  7    ($t2=7)
+    IMemory[2] = 16'b0010_01_10_11_000000;  // and  $3, $1, $2  ($t3=7)
+    IMemory[3] = 16'b0001_01_11_10_000000;  // sub  $2, $1, $3  ($t2=8)
+    IMemory[4] = 16'b0011_10_11_10_000000;  // or   $2, $2, $3  ($t2=15)
+    IMemory[5] = 16'b0000_10_11_11_000000;  // add  $3, $2, $3  ($t3=22)
+    IMemory[6] = 16'b0100_10_11_01_000000;  // nor  $1, $2, $3  ($t1=-32)
+    IMemory[7] = 16'b0110_11_10_01_000000;  // slt  $1, $3, $2  ($t1=0)
+    IMemory[8] = 16'b0110_10_11_01_000000;  // slt  $1, $2, $3  ($t1=1)
+  end
+  initial PC = 0;
+  assign IR = IMemory[PC>>1]; // byte address, shifting two bits to the right (dividing)
+  assign WR = (RegDst) ? IR[9:8]: IR[7:6]; // RegDst Mux, change to gate level
+  assign B  = (ALUSrc) ? SignExtend: RD2; // ALUSrc Mux, change to gate level
+  assign SignExtend = {{8{IR[7]}},IR[7:0]}; // sign extension unit, bit 7 copied eight times
+  reg_file rf (IR[11:10],IR[9:8],WR,ALUOut,RegWrite,A,RD2,clock); // check diagram
+  alu fetch (4'b0010,PC,2,NextPC,Unused); // adds four to PC
+  alu ex (ALUctl, A, B, ALUOut, Zero); // no changes needed
+  MainControl MainCtr (IR[15:12],{RegDst,ALUSrc,RegWrite,ALUctl}); // signals come from Main Control Unit
+  always @(negedge clock) begin 
+    PC <= NextPC;
+  end
+endmodule
+
+// Test module
+module test ();
+  reg clock;
+  wire signed [15:0] WD,IR,PC;
+  CPU test_cpu(clock,PC,WD,IR);
+  always #1 clock = ~clock;
+  initial begin
+    $display ("PC   IR                                 WD");
+    $monitor ("%2d   %b  %3d (%b)",PC,IR,WD,WD);
+    clock = 1;
+    #16 $finish;
+  end
+endmodule
