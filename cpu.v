@@ -500,6 +500,8 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst);
         RegDst <= 1'b1;
         ALUSrc <= 1'b1;
       end
+
+      // add the rest of the operations
       
 
     endcase
