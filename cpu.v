@@ -493,6 +493,48 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst);
         ALUSrc   <= 1'b0;
       end
 
+      4'b0001: begin //sub
+      ALUctl   <= 4'b0110;
+      RegWrite <= 1'b1;
+      RegDst   <= 1'b0;
+      ALUSrc   <= 1'b0;
+      end
+
+      4'b0010: begin // and
+      ALUctl   <= 4'b0000;
+      RegWrite <= 1'b1;
+      RegDst   <= 1'b0;
+      ALUSrc   <= 1'b0;
+      end
+
+      4'b0011: begin //OR
+      ALUctl   <= 4'b0001;
+      RegWrite <= 1'b1;
+      RegDst   <= 1'b0;
+      ALUSrc   <= 1'b0;
+      end
+
+     4'b0100: begin //NOR
+     ALUctl   <= 4'b1100;
+     RegWrite <= 1'b1;
+     RegDst   <= 1'b0;
+     ALUSrc   <= 1'b0;
+      end
+    
+    4'b0101: begin //nand
+    ALUctl   <= 4'b1101;
+    RegWrite <= 1'b1;
+    RegDst   <= 1'b0;
+    ALUSrc   <= 1'b0;
+    end
+
+    4'b0110: begin //slt
+    ALUctl   <= 4'b0111;
+    RegWrite <= 1'b1;
+    RegDst   <= 1'b0;
+    ALUSrc   <= 1'b0;
+    end
+    
       // R-type
       4'b0111: begin // addi
         ALUctl <= 4'b0010;
@@ -501,7 +543,6 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst);
         ALUSrc <= 1'b1;
       end
 
-      // add the rest of the operations
       
 
     endcase
