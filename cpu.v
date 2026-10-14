@@ -491,9 +491,9 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq, Ju
         RegWrite <= 1'b1;
         RegDst   <= 1'b0;
         ALUSrc   <= 1'b0;
-        MemWrite <= 1'b0
-        Beq <= 1'b0
-        Bnq <= 1'b0
+        MemWrite <= 1'b0;
+        Beq <= 1'b0;
+        Bnq <= 1'b0;
       end
 
       4'b0001: begin //sub
@@ -501,9 +501,9 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq, Ju
         RegWrite <= 1'b1;
         RegDst   <= 1'b0;
         ALUSrc   <= 1'b0;
-        MemWrite <= 1'b0
-        Beq <= 1'b0
-        Bnq <= 1'b0
+        MemWrite <= 1'b0;
+        Beq <= 1'b0;
+        Bnq <= 1'b0;
       end
 
       4'b0010: begin // and
@@ -511,9 +511,9 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq, Ju
         RegWrite <= 1'b1;
         RegDst   <= 1'b0;
         ALUSrc   <= 1'b0;
-        MemWrite <= 1'b0
-        Beq <= 1'b0
-        Bnq <= 1'b0
+        MemWrite <= 1'b0;
+        Beq <= 1'b0;
+        Bnq <= 1'b0;
       end
 
       4'b0011: begin //OR
@@ -521,9 +521,9 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq, Ju
         RegWrite <= 1'b1;
         RegDst   <= 1'b0;
         ALUSrc   <= 1'b0;
-        MemWrite <= 1'b0
-        Beq <= 1'b0
-        Bnq <= 1'b0
+        MemWrite <= 1'b0;
+        Beq <= 1'b0;
+        Bnq <= 1'b0;
       end
 
      4'b0100: begin //NOR
@@ -531,9 +531,9 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq, Ju
        RegWrite <= 1'b1;
        RegDst   <= 1'b0;
        ALUSrc   <= 1'b0;
-       MemWrite <= 1'b0
-       Beq <= 1'b0
-       Bnq <= 1'b0
+       MemWrite <= 1'b0;
+       Beq <= 1'b0;
+       Bnq <= 1'b0;
       end
     
     4'b0101: begin //nand
@@ -541,9 +541,9 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq, Ju
       RegWrite <= 1'b1;
       RegDst   <= 1'b0;
       ALUSrc   <= 1'b0;
-      MemWrite <= 1'b0
-      Beq <= 1'b0
-      Bnq <= 1'b0
+      MemWrite <= 1'b0;
+      Beq <= 1'b0;
+      Bnq <= 1'b0;
     end
 
     4'b0110: begin //slt
@@ -551,9 +551,9 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq, Ju
       RegWrite <= 1'b1;
       RegDst   <= 1'b0;
       ALUSrc   <= 1'b0;
-      MemWrite <= 1'b0
-      Beq <= 1'b0
-      Bnq <= 1'b0
+      MemWrite <= 1'b0;
+      Beq <= 1'b0;
+      Bnq <= 1'b0;
     end
     
       // R-type
@@ -562,64 +562,64 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq, Ju
         RegWrite <= 1'b1;
         RegDst <= 1'b1;
         ALUSrc <= 1'b1;
-        MemWrite <= 1'b0
-        Beq <= 1'b0
-        Bnq <= 1'b0
+        MemWrite <= 1'b0;
+        Beq <= 1'b0;
+        Bnq <= 1'b0;
       end
 
     // memory
     4'b1000: begin // lw
-        ALUctl <= 4'b0010
-        RegWrite <= 1'b1
-        RegDst <= 1'b1
-        ALUSrc <= 1'b1
-        MemWrite <= 1'b0
-        Beq <= 1'b0
-        Bnq <= 1'b0
+        ALUctl <= 4'b0010;
+        RegWrite <= 1'b1;
+        RegDst <= 1'b1;
+        ALUSrc <= 1'b1;
+        MemWrite <= 1'b0;
+        Beq <= 1'b0;
+        Bnq <= 1'b0;
     end
     
     // memory
     4'b1001: begin // sw
-        ALUctl <= 4'b0010
-        RegWrite <= 1'b0
-        RegDst <= 1'bx
-        ALUSrc <= 1'b1
-        MemWrite <= 1'b1
-        Beq <= 1'b0
-        Bnq <= 1'b0
+        ALUctl <= 4'b0010;
+        RegWrite <= 1'b0;
+        RegDst <= 1'bx;
+        ALUSrc <= 1'b1;
+        MemWrite <= 1'b1;
+        Beq <= 1'b0;
+        Bnq <= 1'b0;
     end
     
     // branching
     4'b1010: begin // beq
-        ALUctl <= 4'b0001
-        RegWrite <= 1'b0
-        RegDst <= 1'bx
-        ALUSrc <= 1'b0
-        MemWrite <= 1'b0
-        Beq <= 1'b1
-        Bnq <= 1'b0
+        ALUctl <= 4'b0001;
+        RegWrite <= 1'b0;
+        RegDst <= 1'bx;
+        ALUSrc <= 1'b0;
+        MemWrite <= 1'b0;
+        Beq <= 1'b1;
+        Bnq <= 1'b0;
     end
     
     // branching
     4'b1011: begin // bnq
-        ALUctl <= 4'b0001
-        RegWrite <= 0
-        RegDst <= 1'bx
-        ALUSrc <= 0
-        MemWrite <= 1'b0
-        Beq <= 1'b0
-        Bnq <= 1'b1
+        ALUctl <= 4'b0001;
+        RegWrite <= 0;
+        RegDst <= 1'bx;
+        ALUSrc <= 0;
+        MemWrite <= 1'b0;
+        Beq <= 1'b0;
+        Bnq <= 1'b1;
     end
 
     // branching
     4'b1111: begin //jump
-        ALUctl <= 4'bxxxx
-        RegWrite <= 1'b0
-        RegDst <= 1'bx
-        ALUsrc <= 1'b0
-        MemWrite <= 1'b0
-        Beq <= 1'b0
-        Bnq <= 1'b0
+        ALUctl <= 4'bxxxx;
+        RegWrite <= 1'b0;
+        RegDst <= 1'bx;
+        ALUsrc <= 1'b0;
+        MemWrite <= 1'b0;
+        Beq <= 1'b0;
+        Bnq <= 1'b0;
     end
 
     endcase
