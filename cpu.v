@@ -567,9 +567,6 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq, Ju
         Bnq <= 1'b0
       end
 
-
-      // add jp saveword, load word bne, beq
-
     // memory
     4'b1000: begin // lw
         ALUctl <= 4'b0010
@@ -585,8 +582,8 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq, Ju
     4'b1001: begin // sw
         ALUctl <= 4'b0010
         RegWrite <= 1'b0
-        // RegDst <= x
-        ALUsrc <= 1'b1
+        RegDst <= 1'bx
+        ALUSrc <= 1'b1
         MemWrite <= 1'b1
         Beq <= 1'b0
         Bnq <= 1'b0
@@ -596,8 +593,8 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq, Ju
     4'b1010: begin // beq
         ALUctl <= 4'b0001
         RegWrite <= 1'b0
-        //RegDst <= x
-        ALUsrc <= 1'b
+        RegDst <= 1'bx
+        ALUSrc <= 1'b0
         MemWrite <= 1'b0
         Beq <= 1'b1
         Bnq <= 1'b0
@@ -607,11 +604,22 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq, Ju
     4'b1011: begin // bnq
         ALUctl <= 4'b0001
         RegWrite <= 0
-        //RegDst <= x
-        ALUsrc <= 0
+        RegDst <= 1'bx
+        ALUSrc <= 0
         MemWrite <= 1'b0
         Beq <= 1'b0
         Bnq <= 1'b1
+    end
+
+    // branching
+    4'b1111: begin //jump
+        ALUctl <= 4'bxxxx
+        RegWrite <= 1'b0
+        RegDst <= 1'bx
+        ALUsrc <= 1'b0
+        MemWrite <= 1'b0
+        Beq <= 1'b0
+        Bnq <= 1'b0
     end
 
     endcase
