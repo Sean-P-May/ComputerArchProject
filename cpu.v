@@ -476,21 +476,24 @@ module ALU(op, a, b, result, zero);
 endmodule
 
 
-module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst); 
+module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq); 
   input [3:0] Op;
 
   output reg [3:0] ALUctl;
-  output reg ALUSrc, RegWrite, RegDst;
+  output reg ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq;
 
   // Control bits: RegDst, ALUSrc, RegWrite, ALUctl
   always @(Op) begin
-    case (Op)
+    case (Op) // Add new wire outputs
 
       4'b0000: begin // add
         ALUctl   <= 4'b0010;
         RegWrite <= 1'b1;
         RegDst   <= 1'b0;
         ALUSrc   <= 1'b0;
+        // MemWrite 
+        // BEQ
+        // BNQ for each instructions
       end
 
       4'b0001: begin //sub
@@ -543,6 +546,9 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst);
         ALUSrc <= 1'b1;
       end
 
+
+      // add jp saveword, load word bne, beq
+
       
 
     endcase
@@ -550,18 +556,35 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst);
 
 endmodule
 
+module BCU(bnq, beq, zero, out);// Branch Control Unit
+  // Gate level logic
+  //
+endmodule
+
 
 module CPU (clock,PC,ALUOut,IR);
   input clock;
   output [15:0] ALUOut,IR,PC;
   reg[15:0] PC;
-  reg[15:0] IMemory[0:1023]; // don't worry about memory
-  wire [15:0] IR,NextPC,A,B,ALUOut,RD2,SignExtend;
+  reg[15:0] IMemory[0:1023], DMemory[0:1023]; // added DMemory  
+  // 16-bit wires
+  wire [15:0] NextPC, PCplus2, BranchTarget;
+  wire [15:0] A, B, RD2, SignExtend;
+  wire [15:0] MemoryReadData, Value2Write2Reg;
+
+  //control wires
   wire [3:0] ALUctl;
   wire [1:0] WR;
+
   wire RegWrite, ALUSrc, RegDst; // Write Register
+  wire MemWrite, MemToReg;
+  wire Beq, Bnq, BranchTaken;
+  wire Zero, Unused, Unused2;
+
 // Test Program, RECOMPILE/EDIT FOR 16 BITS, USE BINARY
   initial begin 
+
+    // replace with new test
     IMemory[0] = 16'b0111_00_01_00001111;  // addi $1, $0,  15   ($t1=15)
     IMemory[1] = 16'b0111_00_10_00000111;  // addi $2, $0,  7    ($t2=7)
     IMemory[2] = 16'b0010_01_10_11_000000;  // and  $3, $1, $2  ($t3=7)
@@ -573,21 +596,32 @@ module CPU (clock,PC,ALUOut,IR);
     IMemory[8] = 16'b0110_10_11_01_000000;  // slt  $1, $2, $3  ($t1=1)
   end
   initial PC = 0;
+
   assign IR = IMemory[PC>>1]; // byte address, shifting two bits to the right (dividing)
 
-  multiplexers4x2 mux0 ({IR[9:8], IR[7:6]}, RegDst , WR); // RegDst Mux
+  multiplexers4x2  mux0 ({IR[9:8], IR[7:6]}, RegDst , WR); // RegDst Mux
   multiplexer32x16 mux1 ({SignExtend, RD2}, ALUSrc, B); // ALUSrc Mux
-
-
-
+  multiplexer32x16 mux2 ({BranchTarget, PCplus2},BranchTaken, NextPC);// Branch Mux
+  multiplexer32x16 mux3 ({MemoryReadData, ALUOut}, MemToReg, Value2Write2Reg); // add mux
 
   assign SignExtend = {{8{IR[7]}},IR[7:0]}; // sign extension unit, bit 7 copied eight times
-  reg_file rf (IR[11:10],IR[9:8],WR,ALUOut,RegWrite,A,RD2,clock); // check diagram
-  ALU fetch (4'b0010,PC,16'b10,NextPC,Unused); // adds two to PC
+  reg_file rf (IR[11:10],IR[9:8],WR, Value2Write2Reg,RegWrite,A,RD2,clock); // check diagram
+  ALU fetch (4'b0010,PC,16'b10,PCplus2,Unused); // adds two to PC
   ALU ex (ALUctl, A, B, ALUOut, Zero); // no changes needed
-  MainControl MainCtr (IR[15:12],ALUctl, ALUSrc, RegWrite, RegDst); // signals come from Main Control Unit
+  ALU branch (4'b0010, PCplus2, SignExtend << 1, BranchTarget, Unused2);
+  
+  BCU bcu ( Bnq,Beq,Zero ,BranchTaken); // Branch Control Unit
+
+  MainControl MainCtr (IR[15:12],ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq, MemToReg); // signals come from Main Control Unit
+  
+  // Data Memory Read
+  assign MemoryReadData = DMemory[ALUOut >> 1];
+
+
   always @(negedge clock) begin 
     PC <= NextPC;
+    if (MemWrite)
+      DMemory[ALUOut >> 1] <= RD2;
   end
 endmodule
 
