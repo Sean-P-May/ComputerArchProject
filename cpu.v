@@ -556,9 +556,10 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq);
 
 endmodule
 
-module BCU(bnq, beq, zero, out);// Branch Control Unit
+module BCU(bne, beq, zero, out);// Branch Control Unit
   // Gate level logic
-  //
+  or(bneORbeq,bne,beq);
+  or(out,bneORbeq,zero);
 endmodule
 
 
