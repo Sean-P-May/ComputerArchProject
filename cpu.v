@@ -492,6 +492,8 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, MemToReg, Be
         RegDst   <= 1'b0;
         ALUSrc   <= 1'b0;
         MemWrite <= 1'b0;
+        MemToReg = 1'b0;
+
         Beq <= 1'b0;
         Bnq <= 1'b0;
         Jump <= 1'b0;
@@ -503,6 +505,8 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, MemToReg, Be
         RegDst   <= 1'b0;
         ALUSrc   <= 1'b0;
         MemWrite <= 1'b0;
+        MemToReg = 1'b0;
+
         Beq <= 1'b0;
         Bnq <= 1'b0;
         Jump <= 1'b0;
@@ -515,6 +519,8 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, MemToReg, Be
         RegDst   <= 1'b0;
         ALUSrc   <= 1'b0;
         MemWrite <= 1'b0;
+        MemToReg = 1'b0;
+
         Beq <= 1'b0;
         Bnq <= 1'b0;
         Jump <= 1'b0;
@@ -526,6 +532,8 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, MemToReg, Be
         RegDst   <= 1'b0;
         ALUSrc   <= 1'b0;
         MemWrite <= 1'b0;
+        MemToReg = 1'b0;
+
         Beq <= 1'b0;
         Bnq <= 1'b0;
         Jump <= 1'b0;
@@ -537,6 +545,8 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, MemToReg, Be
        RegDst   <= 1'b0;
        ALUSrc   <= 1'b0;
        MemWrite <= 1'b0;
+        MemToReg = 1'b0;
+
        Beq <= 1'b0;
        Bnq <= 1'b0;
         Jump <= 1'b0;
@@ -548,6 +558,8 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, MemToReg, Be
       RegDst   <= 1'b0;
       ALUSrc   <= 1'b0;
       MemWrite <= 1'b0;
+        MemToReg = 1'b0;
+
       Beq <= 1'b0;
       Bnq <= 1'b0;
         Jump <= 1'b0;
@@ -559,6 +571,8 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, MemToReg, Be
       RegDst   <= 1'b0;
       ALUSrc   <= 1'b0;
       MemWrite <= 1'b0;
+        MemToReg = 1'b0;
+
       Beq <= 1'b0;
       Bnq <= 1'b0;
         Jump <= 1'b0;
@@ -571,6 +585,8 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, MemToReg, Be
         RegDst <= 1'b1;
         ALUSrc <= 1'b1;
         MemWrite <= 1'b0;
+        MemToReg = 1'b0;
+
         Beq <= 1'b0;
         Bnq <= 1'b0;
         Jump <= 1'b0;
@@ -583,6 +599,8 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, MemToReg, Be
         RegDst <= 1'b1;
         ALUSrc <= 1'b1;
         MemWrite <= 1'b0;
+        MemToReg = 1'b1;
+
         Beq <= 1'b0;
         Bnq <= 1'b0;
         Jump <= 1'b0;
@@ -595,6 +613,7 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, MemToReg, Be
         RegDst <= 1'bx;
         ALUSrc <= 1'b1;
         MemWrite <= 1'b1;
+        MemToReg = 1'b0;
         Beq <= 1'b0;
         Bnq <= 1'b0;
         Jump <= 1'b0;
@@ -602,11 +621,12 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, MemToReg, Be
     
     // branching
     4'b1010: begin // beq
-        ALUctl <= 4'b0001;
+        ALUctl <= 4'b0110;
         RegWrite <= 1'b0;
         RegDst <= 1'bx;
         ALUSrc <= 1'b0;
         MemWrite <= 1'b0;
+        MemToReg = 1'b0;
         Beq <= 1'b1;
         Bnq <= 1'b0;
         Jump <= 1'b0;
@@ -614,11 +634,13 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, MemToReg, Be
     
     // branching
     4'b1011: begin // bnq
-        ALUctl <= 4'b0001;
+        ALUctl <= 4'b0110;
         RegWrite <= 0;
         RegDst <= 1'bx;
         ALUSrc <= 0;
         MemWrite <= 1'b0;
+        MemToReg = 1'b0;
+
         Beq <= 1'b0;
         Bnq <= 1'b1;
         Jump <= 1'b0;
@@ -631,6 +653,8 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, MemToReg, Be
         RegDst <= 1'bx;
         ALUSrc <= 1'b0;
         MemWrite <= 1'b0;
+        MemToReg = 1'b0;
+
         Beq <= 1'b0;
         Bnq <= 1'b0;
         Jump <= 1'b1;
@@ -641,13 +665,20 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, MemToReg, Be
 
 endmodule
 
-module BCU(bne, bnq, zero, out);// Branch Control Unit
-  input bne, bnq, zero;
+
+module BCU(bnq, beq, zero, out);
+  input bnq, beq, zero;
   output out;
-  // Gate level logic
-  and(bneANDbnq,bne,bnq);
-  and(out,bneANDbnq,zero);
+
+  wire notZero, beqTaken, bnqTaken;
+
+  not(notZero, zero);
+  and(beqTaken, beq, zero);
+  and(bnqTaken, bnq, notZero);
+  or(out, beqTaken, bnqTaken);
+
 endmodule
+
 
 
 module CPU (clock,PC,ALUOut,IR);
@@ -671,8 +702,13 @@ module CPU (clock,PC,ALUOut,IR);
   wire Zero, Unused, Unused2;
 
 // Test Program, RECOMPILE/EDIT FOR 16 BITS, USE BINARY
-  initial begin 
+  
 
+
+
+
+
+initial begin
     // replace with new test
     IMemory[0] = 16'b0111_00_01_00001111;  // addi $1, $0,  15   ($t1=15)
     IMemory[1] = 16'b0111_00_10_00000111;  // addi $2, $0,  7    ($t2=7)
@@ -683,7 +719,10 @@ module CPU (clock,PC,ALUOut,IR);
     IMemory[6] = 16'b0100_10_11_01_000000;  // nor  $1, $2, $3  ($t1=-32)
     IMemory[7] = 16'b0110_11_10_01_000000;  // slt  $1, $3, $2  ($t1=0)
     IMemory[8] = 16'b0110_10_11_01_000000;  // slt  $1, $2, $3  ($t1=1)
-  end
+end
+
+
+
   initial PC = 0;
 
   assign IR = IMemory[PC>>1]; // byte address, shifting two bits to the right (dividing)
@@ -705,7 +744,7 @@ module CPU (clock,PC,ALUOut,IR);
   
   BCU bcu ( Bnq,Beq,Zero ,BranchTaken); // Branch Control Unit
 
-  MainControl MainCtr (IR[15:12],ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq, MemToReg, Jump); // signals come from Main Control Unit
+  MainControl MainCtr (IR[15:12],ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, MemToReg, Beq, Bnq, Jump); // signals come from Main Control Unit
   
   // Data Memory Read
   assign MemoryReadData = DMemory[ALUOut >> 1];
@@ -717,6 +756,11 @@ module CPU (clock,PC,ALUOut,IR);
       DMemory[ALUOut >> 1] <= RD2;
   end
 endmodule
+
+// Test module
+
+
+
 
 // Test module
 module test ();
@@ -731,3 +775,5 @@ module test ();
     #16 $finish;
   end
 endmodule 
+
+
