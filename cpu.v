@@ -476,11 +476,11 @@ module ALU(op, a, b, result, zero);
 endmodule
 
 
-module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq); 
+module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq, Jump); 
   input [3:0] Op;
 
   output reg [3:0] ALUctl;
-  output reg ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq;
+  output reg ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq, Jump;
 
   // Control bits: RegDst, ALUSrc, RegWrite, ALUctl
   always @(Op) begin
@@ -635,6 +635,7 @@ module CPU (clock,PC,ALUOut,IR);
   wire [15:0] NextPC, PCplus2, BranchTarget;
   wire [15:0] A, B, RD2, SignExtend;
   wire [15:0] MemoryReadData, Value2Write2Reg;
+  wire [15:0] BranchNextPC, address_extended;
 
   //control wires
   wire [3:0] ALUctl;
@@ -642,7 +643,7 @@ module CPU (clock,PC,ALUOut,IR);
 
   wire RegWrite, ALUSrc, RegDst; // Write Register
   wire MemWrite, MemToReg;
-  wire Beq, Bnq, BranchTaken;
+  wire Beq, Bnq, BranchTaken, Jump;
   wire Zero, Unused, Unused2;
 
 // Test Program, RECOMPILE/EDIT FOR 16 BITS, USE BINARY
@@ -665,8 +666,12 @@ module CPU (clock,PC,ALUOut,IR);
 
   multiplexers4x2  mux0 ({IR[9:8], IR[7:6]}, RegDst , WR); // RegDst Mux
   multiplexer32x16 mux1 ({SignExtend, RD2}, ALUSrc, B); // ALUSrc Mux
-  multiplexer32x16 mux2 ({BranchTarget, PCplus2},BranchTaken, NextPC);// Branch Mux
+  multiplexer32x16 mux2 ({BranchTarget, PCplus2},BranchTaken, BranchNextPC);// Branch Mux
   multiplexer32x16 mux3 ({MemoryReadData, ALUOut}, MemToReg, Value2Write2Reg); // add mux
+  
+//for jump
+  assign address_extended = {5'b00000, IR[9:0], 1'b0};
+  multiplexer32x16 mux4 ({address_extended, BranchNextPC}, Jump, NextPC);
 
   assign SignExtend = {{8{IR[7]}},IR[7:0]}; // sign extension unit, bit 7 copied eight times
   reg_file rf (IR[11:10],IR[9:8],WR, Value2Write2Reg,RegWrite,A,RD2,clock); // check diagram
@@ -676,7 +681,7 @@ module CPU (clock,PC,ALUOut,IR);
   
   BCU bcu ( Bnq,Beq,Zero ,BranchTaken); // Branch Control Unit
 
-  MainControl MainCtr (IR[15:12],ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq, MemToReg); // signals come from Main Control Unit
+  MainControl MainCtr (IR[15:12],ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq, MemToReg, Jump); // signals come from Main Control Unit
   
   // Data Memory Read
   assign MemoryReadData = DMemory[ALUOut >> 1];
