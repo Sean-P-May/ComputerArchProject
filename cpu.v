@@ -491,51 +491,69 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq);
         RegWrite <= 1'b1;
         RegDst   <= 1'b0;
         ALUSrc   <= 1'b0;
-        // MemWrite 
-        // BEQ
-        // BNQ for each instructions
+        MemWrite <= 1'b0
+        Beq <= 1'b0
+        Bnq <= 1'b0
       end
 
       4'b0001: begin //sub
-      ALUctl   <= 4'b0110;
-      RegWrite <= 1'b1;
-      RegDst   <= 1'b0;
-      ALUSrc   <= 1'b0;
+        ALUctl   <= 4'b0110;
+        RegWrite <= 1'b1;
+        RegDst   <= 1'b0;
+        ALUSrc   <= 1'b0;
+        MemWrite <= 1'b0
+        Beq <= 1'b0
+        Bnq <= 1'b0
       end
 
       4'b0010: begin // and
-      ALUctl   <= 4'b0000;
-      RegWrite <= 1'b1;
-      RegDst   <= 1'b0;
-      ALUSrc   <= 1'b0;
+        ALUctl   <= 4'b0000;
+        RegWrite <= 1'b1;
+        RegDst   <= 1'b0;
+        ALUSrc   <= 1'b0;
+        MemWrite <= 1'b0
+        Beq <= 1'b0
+        Bnq <= 1'b0
       end
 
       4'b0011: begin //OR
-      ALUctl   <= 4'b0001;
-      RegWrite <= 1'b1;
-      RegDst   <= 1'b0;
-      ALUSrc   <= 1'b0;
+        ALUctl   <= 4'b0001;
+        RegWrite <= 1'b1;
+        RegDst   <= 1'b0;
+        ALUSrc   <= 1'b0;
+        MemWrite <= 1'b0
+        Beq <= 1'b0
+        Bnq <= 1'b0
       end
 
      4'b0100: begin //NOR
-     ALUctl   <= 4'b1100;
-     RegWrite <= 1'b1;
-     RegDst   <= 1'b0;
-     ALUSrc   <= 1'b0;
+       ALUctl   <= 4'b1100;
+       RegWrite <= 1'b1;
+       RegDst   <= 1'b0;
+       ALUSrc   <= 1'b0;
+       MemWrite <= 1'b0
+       Beq <= 1'b0
+       Bnq <= 1'b0
       end
     
     4'b0101: begin //nand
-    ALUctl   <= 4'b1101;
-    RegWrite <= 1'b1;
-    RegDst   <= 1'b0;
-    ALUSrc   <= 1'b0;
+      ALUctl   <= 4'b1101;
+      RegWrite <= 1'b1;
+      RegDst   <= 1'b0;
+      ALUSrc   <= 1'b0;
+      MemWrite <= 1'b0
+      Beq <= 1'b0
+      Bnq <= 1'b0
     end
 
     4'b0110: begin //slt
-    ALUctl   <= 4'b0111;
-    RegWrite <= 1'b1;
-    RegDst   <= 1'b0;
-    ALUSrc   <= 1'b0;
+      ALUctl   <= 4'b0111;
+      RegWrite <= 1'b1;
+      RegDst   <= 1'b0;
+      ALUSrc   <= 1'b0;
+      MemWrite <= 1'b0
+      Beq <= 1'b0
+      Bnq <= 1'b0
     end
     
       // R-type
@@ -544,22 +562,67 @@ module MainControl (Op, ALUctl, ALUSrc, RegWrite, RegDst, MemWrite, Beq, Bnq);
         RegWrite <= 1'b1;
         RegDst <= 1'b1;
         ALUSrc <= 1'b1;
+        MemWrite <= 1'b0
+        Beq <= 1'b0
+        Bnq <= 1'b0
       end
 
 
       // add jp saveword, load word bne, beq
 
-      
+    // memory
+    4'b1000: begin // lw
+        ALUctl <= 4'b0010
+        RegWrite <= 1'b1
+        RegDst <= 1'b1
+        ALUSrc <= 1'b1
+        MemWrite <= 1'b0
+        Beq <= 1'b0
+        Bnq <= 1'b0
+    end
+    
+    // memory
+    4'b1001: begin // sw
+        ALUctl <= 4'b0010
+        RegWrite <= 1'b0
+        // RegDst <= x
+        ALUsrc <= 1'b1
+        MemWrite <= 1'b1
+        Beq <= 1'b0
+        Bnq <= 1'b0
+    end
+    
+    // branching
+    4'b1010: begin // beq
+        ALUctl <= 4'b0001
+        RegWrite <= 1'b0
+        //RegDst <= x
+        ALUsrc <= 1'b
+        MemWrite <= 1'b0
+        Beq <= 1'b1
+        Bnq <= 1'b0
+    end
+    
+    // branching
+    4'b1011: begin // bnq
+        ALUctl <= 4'b0001
+        RegWrite <= 0
+        //RegDst <= x
+        ALUsrc <= 0
+        MemWrite <= 1'b0
+        Beq <= 1'b0
+        Bnq <= 1'b1
+    end
 
     endcase
   end
 
 endmodule
 
-module BCU(bne, beq, zero, out);// Branch Control Unit
+module BCU(bne, bnq, zero, out);// Branch Control Unit
   // Gate level logic
-  or(bneORbeq,bne,beq);
-  or(out,bneORbeq,zero);
+  and(bneANDbnq,bne,bnq);
+  and(out,bneANDbnq,zero);
 endmodule
 
 
