@@ -710,15 +710,10 @@ module CPU (clock,PC,ALUOut,IR);
 
 initial begin
     // replace with new test
-    IMemory[0] = 16'b0111_00_01_00001111;  // addi $1, $0,  15   ($t1=15)
-    IMemory[1] = 16'b0111_00_10_00000111;  // addi $2, $0,  7    ($t2=7)
-    IMemory[2] = 16'b0010_01_10_11_000000;  // and  $3, $1, $2  ($t3=7)
-    IMemory[3] = 16'b0001_01_11_10_000000;  // sub  $2, $1, $3  ($t2=8)
-    IMemory[4] = 16'b0011_10_11_10_000000;  // or   $2, $2, $3  ($t2=15)
-    IMemory[5] = 16'b0000_10_11_11_000000;  // add  $3, $2, $3  ($t3=22)
-    IMemory[6] = 16'b0100_10_11_01_000000;  // nor  $1, $2, $3  ($t1=-32)
-    IMemory[7] = 16'b0110_11_10_01_000000;  // slt  $1, $3, $2  ($t1=0)
-    IMemory[8] = 16'b0110_10_11_01_000000;  // slt  $1, $2, $3  ($t1=1)
+    IMemory[0] = 16'b0111_00_11_00000000;  // addi $3, $0, 0   (counter = 0)
+    IMemory[1] = 16'b0111_00_10_00001010;  // addi $2, $0, 10   ($2 = 10, the limit)
+    IMemory[2] = 16'b0111_11_11_00000001;  // addi $3, $3, 1   (counter = counter + 1)
+    IMemory[3] = 16'b1011_11_10_11111110;  // bne $3, $2, -2   (if counter != limit, jump back to line 2)
 end
 
 
@@ -772,7 +767,7 @@ module test ();
     $display ("PC   IR                                 WD");
     $monitor ("%2d   %b  %3d (%b)",PC,IR,WD,WD);
     clock = 1;
-    #16 $finish;
+    #50 $finish;
   end
 endmodule 
 
