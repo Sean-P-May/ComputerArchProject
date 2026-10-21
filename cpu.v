@@ -701,41 +701,83 @@ module CPU (clock,PC,ALUOut,IR);
   wire Beq, Bnq, BranchTaken, Jump;
   wire Zero, Unused, Unused2;
 
-// Test Program, RECOMPILE/EDIT FOR 16 BITS, USE BINARY
-  
-
-
-
-
-
+// Test Program
 initial begin
-    // replace with new test
-IMemory[0]  = 16'b0111_00_01_00001111;  // addi $1, $0,  15   ($t1=15)
-    IMemory[1]  = 16'b0111_00_10_00000111;  // addi $2, $0,  7    ($t2=7)
-    IMemory[2]  = 16'b0010_01_10_11_000000;  // and  $3, $1, $2   ($t3=7)
-    IMemory[3]  = 16'b0001_01_11_10_000000;  // sub  $2, $1, $3   ($t2=8)
-    IMemory[4]  = 16'b0011_10_11_10_000000;  // or   $2, $2, $3   ($t2=15)
-    IMemory[5]  = 16'b0000_10_11_11_000000;  // add  $3, $2, $3   ($t3=22)
-    IMemory[6]  = 16'b0100_10_11_01_000000;  // nor  $1, $2, $3   ($t1=-32)
-    IMemory[7]  = 16'b0110_11_10_01_000000;  // slt  $1, $3, $2   ($t1=0)
-    IMemory[8]  = 16'b0110_10_11_01_000000;  // slt  $1, $2, $3   ($t1=1)
-    IMemory[9]  = 16'b1001_00_01_00000000;  // sw   $1, 0($0)
-    IMemory[10] = 16'b1000_00_10_00000000;  // lw   $2, 0($0)
-    IMemory[11] = 16'b0000_10_00_11_000000;  // add  $3, $2, $0
-    IMemory[12] = 16'b0111_00_01_00000000;  // addi $1, $0, 0
-    IMemory[13] = 16'b0111_00_11_00001010;  // addi $3, $0, 10
-    IMemory[14] = 16'b1010_01_11_00000010;  // beq  $1, $3, loop_done
-    IMemory[15] = 16'b0111_01_01_00000001;  // addi $1, $1, 1
-    IMemory[16] = 16'b1111_00_0000001110;   // j    loop_top
-    IMemory[17] = 16'b0111_00_01_00000101;  // addi $1, $0, 5
-    IMemory[18] = 16'b0111_00_10_00000101;  // addi $2, $0, 5
-    IMemory[19] = 16'b1011_01_10_00000001;  // bne  $1, $2, bne_skip
-    IMemory[20] = 16'b0111_00_11_00001011;  // addi $3, $0, 11
-    IMemory[21] = 16'b0111_00_01_00000101;  // addi $1, $0, 5
-    IMemory[22] = 16'b0111_00_10_00000110;  // addi $2, $0, 6
-    IMemory[23] = 16'b1011_01_10_00000001;  // bne  $1, $2, bne_target
-    IMemory[24] = 16'b0111_00_11_00010110;  // addi $3, $0, 22
+    // ==========================================
+    // TEST 1: DEMONSTRATING JUMP WITH A LOOP    
+    // ==========================================
+
+    IMemory[0] = 16'b0111_00_01_00000000; // addi $1, $0, 0
+    IMemory[1] = 16'b0111_00_10_00001010; // addi $2, $0, 10
+
+    IMemory[2] = 16'b0111_01_01_00000001; // addi $1, $1, 1
+    IMemory[3] = 16'b1010_01_10_00000001; // beq $1, $2, +1
+    IMemory[4] = 16'b1111_00_0000000010; // j IMemory[2]
+
+    // Save loop result
+    IMemory[5] = 16'b1001_00_01_00000100; // sw $1, 4($0)
+                                            // DMemory[2] = 10
+
+    // ==========================================
+    // TEST 2: ORIGINAL MEMORY-SWAP PROGRAM FROM SIMPLE.VL
+    // ==========================================
+
+    IMemory[6]  = 16'b1000_00_01_00000000; // lw $1, 0($0)
+    IMemory[7]  = 16'b1000_00_10_00000010; // lw $2, 2($0)
+    IMemory[8]  = 16'b0110_01_10_11_000000; // slt $3, $1, $2
+    IMemory[9]  = 16'b1010_11_00_00000010; // beq $3, $0, +2
+    IMemory[10] = 16'b1001_00_01_00000010; // sw $1, 2($0)
+    IMemory[11] = 16'b1001_00_10_00000000; // sw $2, 0($0)
+    IMemory[12] = 16'b1000_00_01_00000000; // lw $1, 0($0)
+    IMemory[13] = 16'b1000_00_10_00000010; // lw $2, 2($0)
+    IMemory[14] = 16'b0100_10_10_10_000000; // nor $2, $2, $2
+    IMemory[15] = 16'b0111_10_10_00000001; // addi $2, $2, 1
+    IMemory[16] = 16'b0000_01_10_11_000000; // add $3, $1, $2
+
+    // Save absolute difference
+    IMemory[17] = 16'b1001_00_11_00000110; // sw $3, 6($0)
+                                             // DMemory[3] = 2
+
+    // ==========================================
+    // TEST 3: BNE NOT TAKEN
+    // ==========================================
+
+    IMemory[18] = 16'b0111_00_01_00000101; // addi $1, $0, 5
+    IMemory[19] = 16'b0111_00_10_00000101; // addi $2, $0, 5
+    IMemory[20] = 16'b1011_01_10_00000001; // bne $1, $2, +1
+
+    IMemory[21] = 16'b0111_00_11_00001011; // addi $3, $0, 11
+    IMemory[22] = 16'b1001_00_11_00001000; // sw $3, 8($0)
+                                             // DMemory[4] = 11
+
+    // ==========================================
+    // TEST 4: BNE TAKEN
+    // ==========================================
+
+    IMemory[23] = 16'b0111_00_10_00000111; // addi $2, $0, 7
+    IMemory[24] = 16'b1011_01_10_00000001; // bne $1, $2, +1
+
+    IMemory[25] = 16'b0111_00_11_01100011; // addi $3, $0, 99
+                                             // Must be skipped
+
+    IMemory[26] = 16'b0111_00_11_00100001; // addi $3, $0, 33
+    IMemory[27] = 16'b1001_00_11_00001010; // sw $3, 10($0)
+                                             // DMemory[5] = 33
+    // ==========================================
+    // INITIAL DATA MEMORY
+    // ==========================================
+
+    // Change these two values to test original BEQ
+    DMemory[0] = 16'd5;
+    DMemory[1] = 16'd7;
+
+    // Test result locations
+    DMemory[2] = 16'd0;
+    DMemory[3] = 16'd0;
+    DMemory[4] = 16'd0;
+    DMemory[5] = 16'd0;
 end
+
 
 
 
@@ -778,19 +820,36 @@ endmodule
 
 
 
-// Test module
+
+
 module test ();
-  reg clock;
-  wire signed [15:0] WD,IR,PC;
-  CPU test_cpu(clock,PC,WD,IR);
-  always #1 clock = ~clock;
-  initial begin
-    $display ("PC   IR                                 WD");
-    $monitor ("%2d   %b  %3d (%b)",PC,IR,WD,WD);
-    clock = 1;
-  #112 $finish;
-  end
-endmodule 
+    reg clock;
+    wire signed [15:0] WD, IR, PC;
+
+    CPU test_cpu(clock, PC, WD, IR);
+
+    always #1 clock = ~clock;
+
+    initial begin
+        clock = 1;
+
+        $display("PC   IR                                 WD");
+        $monitor("%2d   %b  %3d (%b)", PC, IR, WD, WD);
+        #104;
+
+
+        $display("\n===== FINAL MEMORY RESULTS =====");
+        $display("DMemory[0] (swap first)  = %0d", test_cpu.DMemory[0]);
+        $display("DMemory[1] (swap second) = %0d", test_cpu.DMemory[1]);
+        $display("DMemory[2] (loop)        = %0d", test_cpu.DMemory[2]);
+        $display("DMemory[3] (difference)  = %0d", test_cpu.DMemory[3]);
+        $display("DMemory[4] (BNE not taken) = %0d", test_cpu.DMemory[4]);
+        $display("DMemory[5] (BNE taken)     = %0d", test_cpu.DMemory[5]);
+
+
+        $finish;
+    end
+endmodule
 
 
 
