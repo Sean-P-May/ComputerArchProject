@@ -1,5 +1,5 @@
 // Behavioral model of MIPS, 3-stage pipeline for R-types and addi only
-// Implements forwarding
+// No forwarding (forwarding lines are commented out; hazards are shown with and without nop's
 module reg_file (RR1,RR2,WR,WD,RegWrite,RD1,RD2,clock);
 
   input [1:0] RR1,RR2,WR;
